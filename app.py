@@ -27,9 +27,7 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-    f'postgresql://{os.getenv("DATABASE_USER")}:{os.getenv("DATABASE_PASSWORD")}@localhost:5432/{os.getenv("DATABASE_NAME")}'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -364,7 +362,7 @@ def show_artist(artist_id):
         "phone": artist.phone,
         "website": artist.website,
         "facebook_link": artist.facebook_link,
-        "seeking_venue": artist.seeking_venue,
+        "seeking_venue": artist.is_seeking_venue,
         "seeking_description": artist.seeking_description,
         "image_link": artist.image_link,
         "past_shows": past_shows,
@@ -394,7 +392,7 @@ def edit_artist_form(artist_id):
         form.facebook_link.data = artist.facebook_link
         form.image_link.data = artist.image_link
         form.website.data = artist.website
-        form.seeking_venue.data = artist.seeking_venue
+        form.seeking_venue.data = artist.is_seeking_venue
         form.seeking_description.data = artist.seeking_description
 
     return render_template('forms/edit_artist.html', form=form, artist=artist)
@@ -415,7 +413,7 @@ def edit_artist(artist_id):
         artist.image_link = request.form['image_link']
         artist.facebook_link = request.form['facebook_link']
         artist.website = request.form['website']
-        artist.seeking_venue = True if 'seeking_venue' in request.form else False
+        artist.is_seeking_venue = True if 'seeking_venue' in request.form else False
         artist.seeking_description = request.form['seeking_description']
 
         db.session.commit()
@@ -508,13 +506,13 @@ def create_artist():
         facebook_link = request.form['facebook_link']
         image_link = request.form['image_link']
         website = request.form['website']
-        seeking_venue = True if 'seeking_venue' in request.form else False
+        is_seeking_venue = True if 'seeking_venue' in request.form else False
         seeking_description = request.form['seeking_description']
 
         artist = Artist(name=name, city=city, state=state, phone=phone,
         genres=genres, facebook_link=facebook_link,
                         image_link=image_link, website=website,
-                        seeking_venue=seeking_venue, seeking_description=seeking_description)
+                        is_seeking_venue=is_seeking_venue, seeking_description=seeking_description)
         db.session.add(artist)
         db.session.commit()
     except:
