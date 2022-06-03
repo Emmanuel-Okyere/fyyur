@@ -1,8 +1,8 @@
-"""Creating of Venue, Artist, and show table
+"""created venue, shows, and artists table
 
-Revision ID: e964fb362086
+Revision ID: c50a71f65b15
 Revises: 
-Create Date: 2022-06-02 13:08:38.922852
+Create Date: 2022-06-03 10:11:33.534323
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'e964fb362086'
+revision = 'c50a71f65b15'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,7 +25,7 @@ def upgrade():
     sa.Column('city', sa.String(length=120), nullable=True),
     sa.Column('state', sa.String(length=120), nullable=True),
     sa.Column('phone', sa.String(length=120), nullable=True),
-    sa.Column('website', sa.String(length=120), nullable=True),
+    sa.Column('website_link', sa.String(length=120), nullable=True),
     sa.Column('image_link', sa.String(length=500), nullable=True),
     sa.Column('facebook_link', sa.String(length=120), nullable=True),
     sa.Column('is_seeking_venue', sa.Boolean(), nullable=True),
@@ -42,7 +42,7 @@ def upgrade():
     sa.Column('phone', sa.String(length=120), nullable=True),
     sa.Column('image_link', sa.String(length=500), nullable=True),
     sa.Column('facebook_link', sa.String(length=120), nullable=True),
-    sa.Column('website', sa.String(length=120), nullable=True),
+    sa.Column('website_link', sa.String(length=120), nullable=True),
     sa.Column('is_seeking_talent', sa.Boolean(), nullable=True),
     sa.Column('seeking_description', sa.String(length=500), nullable=True),
     sa.PrimaryKeyConstraint('id')
