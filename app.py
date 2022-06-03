@@ -3,12 +3,10 @@
 # Imports
 #----------------------------------------------------------------------------#
 import logging
-import os
 from logging import FileHandler, Formatter
 
 import babel
 import dateutil.parser
-from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template,\
     request, url_for
 from flask_migrate import Migrate
@@ -21,7 +19,6 @@ from forms import *
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
-load_dotenv()
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
@@ -31,8 +28,6 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-
-
 class Venue(db.Model):
     """Model for Venue table"""
     id = db.Column(db.Integer, primary_key=True)
@@ -44,7 +39,7 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
     is_seeking_talent = db.Column(db.Boolean)
     seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref="venue", lazy=True)
@@ -61,7 +56,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    website = db.Column(db.String(120))
+    website_link = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     is_seeking_venue = db.Column(db.Boolean)
@@ -87,7 +82,6 @@ class Show(db.Model):
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
-
 def format_datetime(value, format='medium'):
     """Method for formatting the datetime to template"""
     date = dateutil.parser.parse(value)
@@ -103,7 +97,6 @@ app.jinja_env.filters['datetime'] = format_datetime
 #----------------------------------------------------------------------------#
 # Controllers.
 #----------------------------------------------------------------------------#
-
 
 @app.route('/')
 def index():
@@ -204,7 +197,7 @@ def show_venue(venue_id):
         "city": venue.city,
         "state": venue.state,
         "phone": venue.phone,
-        "website": venue.website,
+        "website_link": venue.website_link,
         "facebook_link": venue.facebook_link,
         "seeking_talent": venue.is_seeking_talent,
         "seeking_description": venue.seeking_description,
@@ -242,13 +235,13 @@ def create_venue():
         genres = request.form.getlist('genres')
         image_link = request.form['image_link']
         facebook_link = request.form['facebook_link']
-        website = request.form['website']
+        website_link = request.form['website_link']
         is_seeking_talent = True if 'seeking_talent' in request.form else False
         seeking_description = request.form['seeking_description']
 
         venue = Venue(name=name, city=city, state=state, address=address,
          phone=phone, genres=genres, facebook_link=facebook_link,
-                      image_link=image_link, website=website,
+                      image_link=image_link, website_link=website_link,
                       is_seeking_talent=is_seeking_talent, seeking_description=seeking_description)
         db.session.add(venue)
         db.session.commit()
@@ -330,7 +323,7 @@ def show_artist(artist_id):
         return render_template('errors/404.html')
 
     past_shows_query = db.session.query(Show).join(Venue).filter(
-        Show.artist_id == artist_id).filter(Show.start_time > datetime.now()).all()
+        Show.artist_id == artist_id).filter(Show.start_time < datetime.now()).all()
     past_shows = []
 
     for show in past_shows_query:
@@ -360,7 +353,7 @@ def show_artist(artist_id):
         "city": artist.city,
         "state": artist.state,
         "phone": artist.phone,
-        "website": artist.website,
+        "website_link": artist.website_link,
         "facebook_link": artist.facebook_link,
         "seeking_venue": artist.is_seeking_venue,
         "seeking_description": artist.seeking_description,
@@ -391,7 +384,7 @@ def edit_artist_form(artist_id):
         form.genres.data = artist.genres
         form.facebook_link.data = artist.facebook_link
         form.image_link.data = artist.image_link
-        form.website.data = artist.website
+        form.website_link.data = artist.website_link
         form.seeking_venue.data = artist.is_seeking_venue
         form.seeking_description.data = artist.seeking_description
 
@@ -412,7 +405,7 @@ def edit_artist(artist_id):
         artist.genres = request.form.getlist('genres')
         artist.image_link = request.form['image_link']
         artist.facebook_link = request.form['facebook_link']
-        artist.website = request.form['website']
+        artist.website_link = request.form['website_link']
         artist.is_seeking_venue = True if 'seeking_venue' in request.form else False
         artist.seeking_description = request.form['seeking_description']
 
@@ -444,7 +437,7 @@ def edit_venue(venue_id):
         form.genres.data = venue.genres
         form.facebook_link.data = venue.facebook_link
         form.image_link.data = venue.image_link
-        form.website.data = venue.website
+        form.website_link.data = venue.website_link
         form.seeking_talent.data = venue.is_seeking_talent
         form.seeking_description.data = venue.seeking_description
 
@@ -466,7 +459,7 @@ def edited_venue(venue_id):
         venue.genres = request.form.getlist('genres')
         venue.image_link = request.form['image_link']
         venue.facebook_link = request.form['facebook_link']
-        venue.website = request.form['website']
+        venue.website_link = request.form['website_link']
         venue.is_seeking_talent = True if 'seeking_talent' in request.form else False
         venue.seeking_description = request.form['seeking_description']
 
@@ -505,13 +498,13 @@ def create_artist():
         genres = request.form.getlist('genres'),
         facebook_link = request.form['facebook_link']
         image_link = request.form['image_link']
-        website = request.form['website']
+        website_link = request.form['website_link']
         is_seeking_venue = True if 'seeking_venue' in request.form else False
         seeking_description = request.form['seeking_description']
 
         artist = Artist(name=name, city=city, state=state, phone=phone,
         genres=genres, facebook_link=facebook_link,
-                        image_link=image_link, website=website,
+                        image_link=image_link, website_link=website_link,
                         is_seeking_venue=is_seeking_venue, seeking_description=seeking_description)
         db.session.add(artist)
         db.session.commit()
