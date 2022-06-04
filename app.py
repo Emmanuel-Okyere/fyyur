@@ -7,8 +7,7 @@ from logging import FileHandler, Formatter
 
 import babel
 import dateutil.parser
-from flask import Flask, flash, redirect, render_template,\
-    request, url_for
+from flask import Flask, flash, redirect, render_template, request, url_for
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -28,56 +27,7 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-class Venue(db.Model):
-    """Model for Venue table"""
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    genres = db.Column(db.ARRAY(db.String()))
-    address = db.Column(db.String(120))
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website_link = db.Column(db.String(120))
-    is_seeking_talent = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', backref="venue", lazy=True)
-
-    def __repr__(self):
-        return f'Venue {self.name}'
-
-
-class Artist(db.Model):
-    """Model for artist table"""
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    genres = db.Column(db.ARRAY(db.String))
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    website_link = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    is_seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', backref="artist", lazy=True)
-
-    def __repr__(self):
-        return f'Artist {self.name}'
-
-
-class Show(db.Model):
-    """Model for shows table which has both Venue and artist as foreing keys"""
-    id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey(
-        'artist.id'), nullable=False)
-    venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
-    start_time = db.Column(db.DateTime, nullable=False)
-
-    def __repr__(self):
-        return f'Show {self.artist_id}{self.venue_id}'
-
+from models import *
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -217,7 +167,7 @@ def show_venue(venue_id):
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
     """Router for getting of form for the creation of venues"""
-    form = VenueForm()
+    form = VenueForm(request.form)
     return render_template('forms/new_venue.html', form=form)
 
 
@@ -225,7 +175,7 @@ def create_venue_form():
 def create_venue():
     """Router for when a POST request is made from the form"""
     error = False
-
+    form = VenueForm(request.form)
     try:
         name = request.form['name']
         city = request.form['city']
@@ -330,7 +280,7 @@ def show_artist(artist_id):
         past_shows.append({
             "venue_id": show.venue_id,
             "venue_name": show.venue.name,
-            "artist_image_link": show.venue.image_link,
+            "venue_image_link": show.venue.image_link,
             "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
         })
 
@@ -342,7 +292,7 @@ def show_artist(artist_id):
         upcoming_shows.append({
             "venue_id": show.venue_id,
             "venue_name": show.venue.name,
-            "artist_image_link": show.venue.image_link,
+            "venue_image_link": show.venue.image_link,
             "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
         })
 
@@ -387,7 +337,6 @@ def edit_artist_form(artist_id):
         form.website_link.data = artist.website_link
         form.seeking_venue.data = artist.is_seeking_venue
         form.seeking_description.data = artist.seeking_description
-
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
@@ -396,7 +345,7 @@ def edit_artist(artist_id):
     """Router for the submission of edited artist data"""
     error = False
     artist = Artist.query.get(artist_id)
-
+    print(request.form)
     try:
         artist.name = request.form['name']
         artist.city = request.form['city']
@@ -408,7 +357,6 @@ def edit_artist(artist_id):
         artist.website_link = request.form['website_link']
         artist.is_seeking_venue = True if 'seeking_venue' in request.form else False
         artist.seeking_description = request.form['seeking_description']
-
         db.session.commit()
     except:
         error = True
