@@ -1,7 +1,7 @@
 """Runs when called with python app.py. This contains all scripts needed for the fyyur project"""
 #----------------------------------------------------------------------------#
 # Imports
-#----------------------------------------------------------------------------#
+#---------------------------------------------------------------------------#
 import logging
 from logging import FileHandler, Formatter
 
